@@ -242,3 +242,11 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+
+
+doc_events = {
+	"*": {
+		"on_update": ["dt_fms.public.py.todo_assignment.on_update","dt_fms.public.py.manual_todo_assignment.on_update"],
+	}
+}
