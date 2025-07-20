@@ -48,11 +48,11 @@ def is_fms_enable():
 
 def is_applied_on_doctype(doc):
     """Check if workflow automation is applied on the given doctype"""
-    
+
     applied_on_doc = frappe.db.get_all("FMS Settings Doctypes",
                                     filters={"parent": "FMS Settings", "doctype_": doc.doctype, "active":1}
                                     )
-    
+
     return len(applied_on_doc) > 0
 
 def on_update(doc, method: str) -> None:
@@ -62,10 +62,10 @@ def on_update(doc, method: str) -> None:
     try:
         if not is_fms_enable():
             return
-        
+
         if not is_applied_on_doctype(doc):
             return
-        
+
         if not hasattr(doc, 'workflow_state'):
             return
 
@@ -77,7 +77,7 @@ def on_update(doc, method: str) -> None:
             f"from {doc.get_doc_before_save().get('workflow_state') if doc.get_doc_before_save() else None} "
             f"to {doc.workflow_state}"
         )
-        
+
         handle_workflow_state_change(doc)
 
     except Exception as e:
@@ -123,13 +123,13 @@ def get_active_workflow(doctype: str) -> Optional[dict]:
             fields=["name"],
             limit=1
         )
-        
+
         if not workflow:
             logger.debug(f"No active workflow found for doctype: {doctype}")
             return None
-        
+
         return frappe.get_doc("Workflow", workflow[0].name)
-    
+
     except Exception as e:
         logger.error(f"Error fetching workflow for {doctype}: {str(e)}", exc_info=True)
         return None
@@ -159,7 +159,7 @@ def close_all_open_todos_for_doc(doc) -> None:
             try:
                 working_hours = get_user_working_hours(todo.allocated_to)
                 holidays = get_holidays_for_user(todo.allocated_to)
-                
+
                 if holidays:
                     print(f"Holidays for {todo.allocated_to}: {holidays}")
 
@@ -170,7 +170,7 @@ def close_all_open_todos_for_doc(doc) -> None:
                     working_hours_end=working_hours.get("end_time"),
                     holidays=holidays
                 )
-                
+
                 # print("\n\n\n\n\nTodo Details:")
                 # print(f"Name: {todo.name}")
                 # print(f"Allocated To: {todo.allocated_to}")
@@ -183,9 +183,9 @@ def close_all_open_todos_for_doc(doc) -> None:
                     "custom_time_taken_to_close": time_taken,
                     "custom_time_delay": calculate_extra_time_taken(todo.custom_tat, time_taken)
                 })
-                
+
                 logger.info(f"Closed todo {todo.name}")
-            
+
             except Exception as e:
                 logger.error(f"Failed to close todo {todo.name}: {str(e)}", exc_info=True)
 
@@ -246,9 +246,9 @@ def create_current_state_todos(doc, current_state: str, workflow) -> None:
                 if tat
                 else None
             )
-            
+
             if expected_end_time:
-                print("Expected End Time = ", expected_end_time)
+                print("\n\n\n\n\n\n\n\nExpected End Time = ", expected_end_time, "\n\n\n")
 
             todo = frappe.get_doc({
                 "doctype": "ToDo",
@@ -343,14 +343,14 @@ def get_holidays_for_user(user: str) -> List[datetime.date]:
         if emp:
             emp = emp[0]
             holiday_list = emp.get("holiday_list")
-            
+
             if not holiday_list and emp.get("default_shift"):
                 holiday_list = frappe.get_value(
                     "Shift Type",
                     emp.get("default_shift"),
                     "holiday_list"
                 )
-            
+
             if not holiday_list and emp.get("company"):
                 holiday_list = frappe.get_value(
                     "Company",
@@ -361,8 +361,8 @@ def get_holidays_for_user(user: str) -> List[datetime.date]:
         if not holiday_list:
             return []
 
-        
-        
+
+
         holidays = frappe.get_all(
             "Holiday",
             filters={"parent": holiday_list},

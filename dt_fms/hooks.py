@@ -250,3 +250,5 @@ doc_events = {
 		"on_update": ["dt_fms.public.py.todo_assignment.on_update","dt_fms.public.py.manual_todo_assignment.on_update"],
 	}
 }
+
+doctype_js = {"todo" : "public/js/todo.js"}
