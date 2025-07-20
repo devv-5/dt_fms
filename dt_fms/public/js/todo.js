@@ -1,8 +1,19 @@
 frappe.ui.form.on("ToDo", {
 	refresh: function (frm) {
-		setTimeout(() => {
-			frm.remove_custom_button(__("Reopen"));
-			frm.remove_custom_button(__("Close"))
-		}, 10);
+			remove_custom_button(frm, [
+				__("Reopen"),
+				__("Close"),
+			]);
 	},
 })
+
+
+function remove_custom_button(frm, labels) {
+	if (!Array.isArray(labels)) {
+		labels = [labels];
+	}
+	labels.forEach(function (label) {
+		frm.remove_custom_button(label);
+	});
+
+}
