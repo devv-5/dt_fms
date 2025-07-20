@@ -1,5 +1,8 @@
 frappe.ui.form.on("ToDo", {
 	refresh: function (frm) {
-		frappe.msgprint("This is a custom message for the ToDo form.");
+		setTimeout(() => {
+			frm.remove_custom_button(__("Reopen"));
+			frm.remove_custom_button(__("Close"))
+		}, 10);
 	},
 })

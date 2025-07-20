@@ -263,4 +263,6 @@ fixtures = [
 
 
 
-doctype_js = {"todo" : "public/js/todo.js"}
+doctype_js = {
+	"ToDo": "public/js/todo.js",
+}
