@@ -251,4 +251,16 @@ doc_events = {
 	}
 }
 
+
+fixtures = [
+    {
+        "dt": "Property Setter",
+        "filters": [
+            ["name", "in", ["ToDo-date-hidden"]]
+        ]
+    }
+]
+
+
+
 doctype_js = {"todo" : "public/js/todo.js"}

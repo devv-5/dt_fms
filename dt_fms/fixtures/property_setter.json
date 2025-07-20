@@ -1,0 +1,18 @@
+[
+ {
+  "default_value": null,
+  "doc_type": "ToDo",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "date",
+  "is_system_generated": 0,
+  "modified": "2025-07-20 16:20:45.533226",
+  "module": "DT FMS",
+  "name": "ToDo-date-hidden",
+  "property": "hidden",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
+ }
+]
