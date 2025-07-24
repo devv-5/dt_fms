@@ -1,0 +1,119 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:CL-{template_name}-{##}",
+ "creation": "2025-07-24 09:52:51.261876",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "assigned_by",
+  "edit_assigned_by",
+  "column_break_lkgi",
+  "category",
+  "expected_start_time",
+  "expected_end_time",
+  "section_break_cxhi",
+  "tasks",
+  "section_break_ianb",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_ianb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Checklist",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Daily Operations\nWeekly Review\nMonthly Maintenance\nQuarterly Audit\nCompliance Checklist\nHousekeeping\nInventory Check\nEquipment Inspection\nSafety Protocols\nOnboarding Process\nOffboarding Process\nIT Maintenance\nFacility Management\nCustomer Follow-up\nHR / Admin Tasks"
+  },
+  {
+   "fieldname": "section_break_cxhi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tasks",
+   "fieldtype": "Table",
+   "label": "Tasks",
+   "options": "Checklist Task"
+  },
+  {
+   "fieldname": "column_break_lkgi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assigned_by",
+   "fieldtype": "Link",
+   "label": "Assigned By",
+   "options": "User",
+   "read_only_depends_on": "eval:doc.edit_assigned_by === 0"
+  },
+  {
+   "fieldname": "expected_start_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Expected Start Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_end_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Expected End Time",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "edit_assigned_by",
+   "fieldtype": "Check",
+   "label": "Edit Assigned By",
+   "options": "User"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-07-24 10:12:56.445034",
+ "modified_by": "Administrator",
+ "module": "DT FMS",
+ "name": "Checklist",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

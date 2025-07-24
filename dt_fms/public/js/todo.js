@@ -1,9 +1,13 @@
 frappe.ui.form.on("ToDo", {
 	refresh: function (frm) {
+
+		if (!(frm.doc.reference_type === "Checklist")) {
 			remove_custom_button(frm, [
 				__("Reopen"),
 				__("Close"),
 			]);
+		}
+		remove_custom_button(frm,__("Reopen"));
 	},
 })
 

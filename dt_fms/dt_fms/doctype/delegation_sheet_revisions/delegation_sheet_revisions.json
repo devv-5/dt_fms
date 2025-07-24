@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-21 16:33:58.971986",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_dbnc",
+  "revision_by",
+  "revisoin_from",
+  "revision_to",
+  "revision_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "revision_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Revision By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revisoin_from",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Revisoin From",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revision_to",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Revision To",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_dbnc",
+   "fieldtype": "Section Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revision_on",
+   "fieldtype": "Datetime",
+   "label": "Revision On",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-21 16:56:35.155917",
+ "modified_by": "Administrator",
+ "module": "DT FMS",
+ "name": "Delegation Sheet Revisions",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

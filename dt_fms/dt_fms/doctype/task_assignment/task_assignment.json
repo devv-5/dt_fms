@@ -8,9 +8,11 @@
  "field_order": [
   "subject",
   "assinged_to_html",
+  "expected_start_time",
   "column_break_zbwo",
   "assigned_to",
   "status",
+  "expected_end_time",
   "section_break_ommo",
   "description"
  ],
@@ -50,17 +52,25 @@
    "options": "Open\nClosed\nCancelled"
   },
   {
-   "fieldname": "assinged_to_html",
-   "fieldtype": "HTML",
-   "label": "Assigned To",
-   "options": "<h1> \n    Hello World !\n</h1>"
+   "fieldname": "expected_start_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Expected Start Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_end_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Expected End Time",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-25 12:58:05.042415",
+ "modified": "2025-07-21 14:31:25.144130",
  "modified_by": "Administrator",
  "module": "DT FMS",
  "name": "Task Assignment",

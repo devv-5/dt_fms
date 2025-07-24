@@ -1,4 +1,10 @@
 import frappe
+import pytz
+import frappe
+from frappe.utils import get_datetime
+from datetime import datetime, timedelta, time
+import pytz
+
 
 def is_fms_enable():
     """Check if FMS is enabled"""
@@ -19,10 +25,15 @@ def on_update(doc, method):
 
     manage_todos_from_child_table(doc)
 
+
+
+
+
+
 def manage_todos_from_child_table(doc):
     """Main function to manage ToDos based on child table"""
     child_table_name = f"{doc.doctype.lower().replace(' ', '_')}_dt_fms_task_assignment"
-    
+
     if child_table_name not in [df.fieldname for df in doc.meta.get_table_fields()]:
         return
 
@@ -34,7 +45,12 @@ def manage_todos_from_child_table(doc):
     for row in current_rows:
         if not (row.get('subject') and row.get('assigned_to')):
             continue
-            
+
+        if row.get('status') == 'Closed':
+            custom_tat_close_time = get_datetime()
+            time_taken = get_tat(row.get("expected_start_time"), custom_tat_close_time, row.get("assigned_to"))
+            time_delay = time_taken - get_tat(row.get("expected_start_time"), row.get("expected_end_time"), row.get("assigned_to"))
+
         todo_name = f"{doc.doctype}-{doc.name}-{row.name}"
         todo_data = {
             "doctype": "ToDo",
@@ -45,14 +61,23 @@ def manage_todos_from_child_table(doc):
             "reference_name": doc.name,
             "priority": "Medium",
             "status": row.get("status", "Open"),
-            "assigned_by": frappe.session.user
+            "assigned_by": frappe.session.user,
+            "custom_tat_start_time": row.get("expected_start_time"),
+            "custom_expected_end_time": row.get("expected_end_time"),
+            "custom_tat": get_tat(row.get("expected_start_time"), row.get("expected_end_time"), row.get("assigned_to")),  # Calculate TAT based on doc"
+            "custom_tat_close_time": custom_tat_close_time if row.get('status') == 'Closed' else None,
+            "custom_time_taken_to_close": time_taken if row.get('status') == 'Closed' else None,
+            "custom_closed_by":row.get("assigned_to") if row.get('status') == 'Closed' else None,
+            "custom_time_delay": time_delay if row.get('status') == 'Closed' and time_delay > 0 else None
+
+
         }
 
         if todo_name in existing_todos:
             update_existing_todo(todo_name, todo_data)
         else:
             create_new_todo(todo_name, todo_data)
-        
+
         processed_todos.add(todo_name)
 
     # Cancel todos for removed rows
@@ -74,7 +99,7 @@ def get_existing_todos(doc):
         },
         fields=["name", "custom_row_reference", "status"]
     )
-    
+
     # Return as dictionary with name as key and a dict of custom_row_reference and status as value
     return {
         todo.name: {
@@ -91,10 +116,9 @@ def create_new_todo(todo_name, todo_data):
     try:
         todo = frappe.get_doc(todo_data)
         todo.insert(ignore_permissions=True)
-        
+
         if todo.name != todo_name:
             frappe.rename_doc("ToDo", todo.name, todo_name, force=True)
-        # frappe.msgprint(f"Created ToDo: {todo_name}")
     except Exception as e:
         frappe.log_error(f"Failed to create ToDo {todo_name}: {str(e)}")
 
@@ -119,15 +143,15 @@ def update_existing_todo(todo_name, todo_data):
 
     except Exception as e:
         frappe.log_error(f"Failed to update ToDo {todo_name}: {str(e)}")
-        
-        
+
+
 
 def cancel_removed_todos(existing_todos, processed_todos):
     """Cancel todos that are no longer in child table"""
     for todo_name, ref_status in existing_todos.items():
         # if status == "Cancelled" continue
         if ref_status['status'] == "Cancelled":
-            continue            
+            continue
         if todo_name not in processed_todos:
             try:
                 todo = frappe.get_doc("ToDo", todo_name)
@@ -136,3 +160,113 @@ def cancel_removed_todos(existing_todos, processed_todos):
                 # frappe.msgprint(f"Cancelled ToDo for removed task: {todo_name}")
             except Exception as e:
                 frappe.log_error(f"Failed to cancel ToDo {todo_name}: {str(e)}")
+
+
+
+
+
+
+
+def to_time(val):
+    if isinstance(val, timedelta):
+        total_seconds = int(val.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        return time(hour=hours, minute=minutes, second=seconds)
+    elif isinstance(val, time):
+        return val
+    return time(0, 0, 0)
+
+def get_tat( start, end, assigned_to):
+    """
+    Calculate the Turnaround Time (TAT) in seconds, considering shift timings and holidays.
+    Handles timezone-aware and timedelta shift durations (Frappe v15 compatible).
+    """
+    if not start or not end:
+        print("\n\n\n\n[DEBUG] Missing expected_start_time or expected_end_time\n\n")
+        return 0
+
+    system_timezone_str = frappe.utils.get_system_timezone()
+    system_tz = pytz.timezone(system_timezone_str)
+    print(f"\n\n\n\n[DEBUG] System timezone: {system_timezone_str}\n\n")
+
+    expected_start = get_datetime(start)
+    expected_end = get_datetime(end)
+    print(f"\n\n\n\n[DEBUG] Raw expected_start: {expected_start}, expected_end: {expected_end}\n\n")
+
+    if expected_start.tzinfo is None:
+        expected_start = system_tz.localize(expected_start)
+    else:
+        expected_start = expected_start.astimezone(system_tz)
+
+    if expected_end.tzinfo is None:
+        expected_end = system_tz.localize(expected_end)
+    else:
+        expected_end = expected_end.astimezone(system_tz)
+
+    print(f"\n\n\n\n[DEBUG] Timezone-aware expected_start: {expected_start}, expected_end: {expected_end}\n\n")
+
+    if expected_start >= expected_end:
+        print("\n\n\n\n[DEBUG] Start time is after or equal to end time. Returning 0.\n\n")
+        return 0
+
+    user_id = assigned_to
+    employee = frappe.db.get_value(
+        "Employee", {"user_id": user_id},
+        ["default_shift", "holiday_list"], as_dict=True
+    )
+    print(f"\n\n\n\n[DEBUG] Employee for user {user_id}: {employee}\n\n")
+
+    shift_start_time = time(0, 0, 0)
+    shift_end_time = time(23, 59, 59)
+    holidays = set()
+
+    if employee:
+        if employee.default_shift:
+            shift = frappe.get_doc("Shift Type", employee.default_shift)
+            shift_start_time = to_time(shift.start_time) or shift_start_time
+            shift_end_time = to_time(shift.end_time) or shift_end_time
+            print(f"\n\n\n\n[DEBUG] Shift timings from '{employee.default_shift}': {shift_start_time} - {shift_end_time}\n\n")
+
+        if employee.holiday_list:
+            holiday_dates = frappe.db.get_all(
+                "Holiday",
+                filters={"parent": employee.holiday_list},
+                pluck="holiday_date"
+            )
+            holidays = set(holiday_dates)
+            print(f"\n\n\n\n[DEBUG] Holidays from list '{employee.holiday_list}': {holidays}\n\n")
+
+    total_seconds = 0
+    current_dt = expected_start
+
+    print(f"\n\n\n\n[DEBUG] Starting TAT calculation loop from {current_dt} to {expected_end}\n\n")
+
+    while current_dt < expected_end:
+        print(f"\n\n\n\n[DEBUG] Checking date: {current_dt.date()}\n\n")
+
+        if current_dt.date() not in holidays:
+            naive_shift_start = datetime.combine(current_dt.date(), shift_start_time)
+            naive_shift_end = datetime.combine(current_dt.date(), shift_end_time)
+
+            shift_start_dt = system_tz.localize(naive_shift_start)
+            shift_end_dt = system_tz.localize(naive_shift_end)
+
+            day_start = max(expected_start, shift_start_dt)
+            day_end = min(expected_end, shift_end_dt)
+
+            print(f"\n\n\n\n[DEBUG] Shift window for {current_dt.date()}: {shift_start_dt} - {shift_end_dt}\n[DEBUG] Overlap: {day_start} - {day_end}\n\n")
+
+            if day_start < day_end:
+                seconds = (day_end - day_start).total_seconds()
+                total_seconds += seconds
+                print(f"\n\n\n\n[DEBUG] Added {seconds} seconds for {current_dt.date()}, total now {total_seconds}\n\n")
+        else:
+            print(f"\n\n\n\n[DEBUG] Skipping holiday: {current_dt.date()}\n\n")
+
+        current_dt += timedelta(days=1)
+
+    print(f"\n\n\n\n[DEBUG] Final total_seconds: {total_seconds}\n\n")
+    return int(total_seconds)
+
