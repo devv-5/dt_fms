@@ -1,23 +1,17 @@
 import frappe
 import pytz
-import frappe
-from frappe.utils import get_datetime
-from datetime import datetime, timedelta, time
-import pytz
-from dt_fms.public.py.utils import (is_applied_on_doctype, is_fms_enable)
 
+def is_fms_enable():
+    """Check if FMS is enabled"""
+    return frappe.db.get_value("FMS Settings", "FMS Settings", "enable")
 
-# def is_fms_enable():
-#     """Check if FMS is enabled"""
-#     return frappe.db.get_value("FMS Settings", "FMS Settings", "enable")
-
-# def is_applied_on_doctype(doc):
-#     """Check if workflow automation is applied on the given doctype"""
-#     return frappe.db.exists("FMS Settings Doctypes", {
-#         "parent": "FMS Settings",
-#         "doctype_": doc.doctype,
-#         "active": 1
-#     })
+def is_applied_on_doctype(doc):
+    """Check if workflow automation is applied on the given doctype"""
+    return frappe.db.exists("FMS Settings Doctypes", {
+        "parent": "FMS Settings",
+        "doctype_": doc.doctype,
+        "active": 1
+    })
 
 def on_update(doc, method):
     """Handle document updates"""
@@ -47,11 +41,6 @@ def manage_todos_from_child_table(doc):
         if not (row.get('subject') and row.get('assigned_to')):
             continue
 
-        if row.get('status') == 'Closed':
-            custom_tat_close_time = get_datetime()
-            time_taken = get_tat(row.get("expected_start_time"), custom_tat_close_time, row.get("assigned_to"))
-            time_delay = time_taken - get_tat(row.get("expected_start_time"), row.get("expected_end_time"), row.get("assigned_to"))
-
         todo_name = f"{doc.doctype}-{doc.name}-{row.name}"
         todo_data = {
             "doctype": "ToDo",
@@ -65,13 +54,7 @@ def manage_todos_from_child_table(doc):
             "assigned_by": frappe.session.user,
             "custom_tat_start_time": row.get("expected_start_time"),
             "custom_expected_end_time": row.get("expected_end_time"),
-            "custom_tat": get_tat(row.get("expected_start_time"), row.get("expected_end_time"), row.get("assigned_to")),  # Calculate TAT based on doc"
-            "custom_tat_close_time": custom_tat_close_time if row.get('status') == 'Closed' else None,
-            "custom_time_taken_to_close": time_taken if row.get('status') == 'Closed' else None,
-            "custom_closed_by":row.get("assigned_to") if row.get('status') == 'Closed' else None,
-            "custom_time_delay": time_delay if row.get('status') == 'Closed' and time_delay > 0 else None
-
-
+            "custom_tat": get_tat(row),  # Calculate TAT based on doc
         }
 
         if todo_name in existing_todos:
@@ -120,6 +103,7 @@ def create_new_todo(todo_name, todo_data):
 
         if todo.name != todo_name:
             frappe.rename_doc("ToDo", todo.name, todo_name, force=True)
+        # frappe.msgprint(f"Created ToDo: {todo_name}")
     except Exception as e:
         frappe.log_error(f"Failed to create ToDo {todo_name}: {str(e)}")
 
@@ -166,7 +150,10 @@ def cancel_removed_todos(existing_todos, processed_todos):
 
 
 
-
+import frappe
+from frappe.utils import get_datetime
+from datetime import datetime, timedelta, time
+import pytz
 
 def to_time(val):
     if isinstance(val, timedelta):
@@ -179,12 +166,12 @@ def to_time(val):
         return val
     return time(0, 0, 0)
 
-def get_tat( start, end, assigned_to):
+def get_tat(row):
     """
     Calculate the Turnaround Time (TAT) in seconds, considering shift timings and holidays.
     Handles timezone-aware and timedelta shift durations (Frappe v15 compatible).
     """
-    if not start or not end:
+    if not row.get("expected_start_time") or not row.get("expected_end_time"):
         print("\n\n\n\n[DEBUG] Missing expected_start_time or expected_end_time\n\n")
         return 0
 
@@ -192,8 +179,8 @@ def get_tat( start, end, assigned_to):
     system_tz = pytz.timezone(system_timezone_str)
     print(f"\n\n\n\n[DEBUG] System timezone: {system_timezone_str}\n\n")
 
-    expected_start = get_datetime(start)
-    expected_end = get_datetime(end)
+    expected_start = get_datetime(row.expected_start_time)
+    expected_end = get_datetime(row.expected_end_time)
     print(f"\n\n\n\n[DEBUG] Raw expected_start: {expected_start}, expected_end: {expected_end}\n\n")
 
     if expected_start.tzinfo is None:
@@ -212,7 +199,7 @@ def get_tat( start, end, assigned_to):
         print("\n\n\n\n[DEBUG] Start time is after or equal to end time. Returning 0.\n\n")
         return 0
 
-    user_id = assigned_to
+    user_id = row.assigned_to
     employee = frappe.db.get_value(
         "Employee", {"user_id": user_id},
         ["default_shift", "holiday_list"], as_dict=True

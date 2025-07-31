@@ -243,13 +243,23 @@ app_license = "mit"
 # }
 
 
-
-
 doc_events = {
-	"*": {
-		"on_update": ["dt_fms.public.py.todo_assignment.on_update","dt_fms.public.py.manual_todo_assignment.on_update"],
+	"*":{
+		"on_update":"dt_fms.public.py.master.on_update",
+		"before_save":"dt_fms.public.py.activity_assignment_monitor.on_update"
 	}
 }
+
+# doc_events = {
+# 	"*": {
+# 		"on_update": [
+#       		"dt_fms.public.py.todo_assignment.on_update",
+#             "dt_fms.public.py.manual_todo_assignment.on_update",
+# 			"dt_fms.public.py.activity_assignment_monitor.on_update"
+#         ],
+
+# 	}
+# }
 
 
 fixtures = [

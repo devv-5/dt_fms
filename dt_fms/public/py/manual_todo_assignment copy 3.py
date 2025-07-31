@@ -4,20 +4,19 @@ import frappe
 from frappe.utils import get_datetime
 from datetime import datetime, timedelta, time
 import pytz
-from dt_fms.public.py.utils import (is_applied_on_doctype, is_fms_enable)
 
 
-# def is_fms_enable():
-#     """Check if FMS is enabled"""
-#     return frappe.db.get_value("FMS Settings", "FMS Settings", "enable")
+def is_fms_enable():
+    """Check if FMS is enabled"""
+    return frappe.db.get_value("FMS Settings", "FMS Settings", "enable")
 
-# def is_applied_on_doctype(doc):
-#     """Check if workflow automation is applied on the given doctype"""
-#     return frappe.db.exists("FMS Settings Doctypes", {
-#         "parent": "FMS Settings",
-#         "doctype_": doc.doctype,
-#         "active": 1
-#     })
+def is_applied_on_doctype(doc):
+    """Check if workflow automation is applied on the given doctype"""
+    return frappe.db.exists("FMS Settings Doctypes", {
+        "parent": "FMS Settings",
+        "doctype_": doc.doctype,
+        "active": 1
+    })
 
 def on_update(doc, method):
     """Handle document updates"""

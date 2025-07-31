@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "subject",
-  "assinged_to_html",
   "expected_start_time",
   "column_break_zbwo",
   "assigned_to",
@@ -31,6 +30,9 @@
   {
    "fieldname": "assigned_to",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Assigned To",
    "options": "User",
    "reqd": 1
@@ -70,7 +72,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-21 14:31:25.144130",
+ "modified": "2025-07-31 23:50:55.730672",
  "modified_by": "Administrator",
  "module": "DT FMS",
  "name": "Task Assignment",

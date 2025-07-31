@@ -3,7 +3,6 @@ from frappe.utils import now, get_datetime, getdate
 from datetime import datetime, timedelta, time
 from typing import Optional, Dict, List, Set, Union
 import logging
-from dt_fms.public.py.utils import (is_applied_on_doctype, is_fms_enable)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -43,18 +42,18 @@ class WorkflowAutomationException(Exception):
 #     return max_tat
 
 
-# def is_fms_enable():
-#     """Check if FMS is enabled"""
-#     return frappe.db.get_value("FMS Settings", "FMS Settings", "enable")
+def is_fms_enable():
+    """Check if FMS is enabled"""
+    return frappe.db.get_value("FMS Settings", "FMS Settings", "enable")
 
-# def is_applied_on_doctype(doc):
-#     """Check if workflow automation is applied on the given doctype"""
+def is_applied_on_doctype(doc):
+    """Check if workflow automation is applied on the given doctype"""
 
-#     applied_on_doc = frappe.db.get_all("FMS Settings Doctypes",
-# 		filters={"parent": "FMS Settings", "doctype_": doc.doctype, "active":1}
-# 	)
+    applied_on_doc = frappe.db.get_all("FMS Settings Doctypes",
+		filters={"parent": "FMS Settings", "doctype_": doc.doctype, "active":1}
+	)
 
-#     return len(applied_on_doc) > 0
+    return len(applied_on_doc) > 0
 
 def on_update(doc, method: str) -> None:
     """
