@@ -82,26 +82,37 @@ def get_all_tasks_of_selected_rule(rule_name):
     return frappe.get_all(
         "Activity Assignment Rule Task",
         filters={"parent": rule_name},
-        fields=["name", "subject", "tat", "assignee", "description"]
+        fields=["name", "subject", "tat", "assignee", "description","parent"]
     )
 
 def create_task_assignments(doc, tasks):
-    # Derive the expected child table fieldname
     field_name = f"{frappe.scrub(doc.doctype)}_dt_fms_task_assignment"
 
-    # Validate if the field exists in the DocType
     if not any(df.fieldname == field_name and df.fieldtype == "Table" for df in doc.meta.fields):
         frappe.throw(f"Child table field '{field_name}' not found in {doc.doctype}.")
 
+    existing_rows = doc.get(field_name) or []
+
+    # Collect already used rule names
+    existing_rule_names = {row.rule_name for row in existing_rows if row.rule_name}
+
     for task in tasks:
+        # Skip if this rule is already used in this document
+        if task.parent in existing_rule_names:
+            continue
+
         expected_start = now_datetime()
         expected_end = add_to_date(expected_start, seconds=task.tat or 0)
 
-        doc.append(field_name, {
+        new_row = {
             "subject": task.subject,
             "status": "Open",
             "expected_start_time": expected_start,
             "expected_end_time": expected_end,
             "description": task.description,
-            "assigned_to": task.assignee
-        })
+            "assigned_to": task.assignee,
+            "rule_name": task.parent,
+            "workflow_state": doc.workflow_state
+        }
+
+        doc.append(field_name, new_row)

@@ -13,7 +13,10 @@
   "status",
   "expected_end_time",
   "section_break_ommo",
-  "description"
+  "description",
+  "section_break_fyxe",
+  "workflow_state",
+  "rule_name"
  ],
  "fields": [
   {
@@ -66,13 +69,28 @@
    "in_list_view": 1,
    "label": "Expected End Time",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_fyxe",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "Workflow State"
+  },
+  {
+   "fieldname": "rule_name",
+   "fieldtype": "Link",
+   "label": "Rule Name",
+   "options": "Activity Assignment Rule"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-31 23:50:55.730672",
+ "modified": "2025-08-01 02:07:42.677054",
  "modified_by": "Administrator",
  "module": "DT FMS",
  "name": "Task Assignment",
